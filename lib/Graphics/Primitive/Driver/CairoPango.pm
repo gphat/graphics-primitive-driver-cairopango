@@ -305,12 +305,93 @@ sub _draw_textbox {
 
     $self->_draw_component($comp);
 
+    my $layout = $self->_make_layout($comp);
+
     my $bbox = $comp->inside_bounding_box;
 
     my $height = $bbox->height;
     my $height2 = $height / 2;
     my $width = $bbox->width;
     my $width2 = $width / 2;
+
+    my $context = $self->cairo;
+
+    # my $font = $comp->font;
+    # 
+    # my $fontmap = Gtk2::Pango::Cairo::FontMap->get_default;
+    # $fontmap->set_resolution(72);
+    # 
+    # my $desc = Gtk2::Pango::FontDescription->new;
+    # $desc->set_family($font->family);
+    # $desc->set_variant($font->variant);
+    # $desc->set_style($font->slant);
+    # $desc->set_weight($font->weight);
+    # 
+    # my $layout = Gtk2::Pango::Cairo::create_layout($context);
+    # 
+    # $layout->set_font_description($desc);
+    # $layout->set_markup($comp->text);
+    # $layout->set_indent(Gtk2::Pango::units_from_double($comp->indent));
+    # $layout->set_alignment($comp->horizontal_alignment);
+    # $layout->set_justify($comp->justify);
+    # $layout->set_wrap($comp->wrap_mode);
+    # $layout->set_ellipsize($comp->ellipsize_mode);
+    # 
+    # my $pcontext = $layout->get_context;
+
+    # my $dir = $comp->direction;
+    # if($dir eq 'auto') {
+    #     $layout->set_auto_dir(1);
+    # } else {
+    #     $layout->set_auto_dir(0);
+    #     $pcontext->set_base_dir($dir);
+    # }
+
+    # $layout->set_width(Gtk2::Pango::units_from_double($bbox->width));
+    # $layout->set_height(Gtk2::Pango::units_from_double($bbox->height));
+    # 
+    $context->set_source_rgba($comp->color->as_array_with_alpha);
+
+    # $pcontext->set_base_gravity('east');
+    # $pcontext->set_gravity_hint('strong');
+
+    # Gtk2::Pango::Cairo::update_context($context, $pcontext);
+    # Gtk2::Pango::Cairo::update_layout($context, $layout);
+    # $layout->context_changed;
+
+    my ($ink, $log) = $layout->get_pixel_extents;
+
+    my $y = 0;
+    if($comp->vertical_alignment eq 'bottom') {
+        $y = $height - $log->{height};
+    } elsif($comp->vertical_alignment eq 'center') {
+        $y = $height2 - $log->{height} / 2;
+    }
+
+    # Rotation, for the future
+    # $context->translate($bbox->width / 2, $bbox->height / 2);
+    # $context->rotate(-3.14 / 2);
+    # $context->translate(-$bbox->width / 2, -$bbox->height / 2);
+
+    # The extents reported here (x,y) are to the inked portion, not the
+    # full width in cases like centered text...
+    $context->move_to(0, $y);
+
+    use Data::Dumper;
+    print Dumper($log);
+    print Dumper($ink);
+    Gtk2::Pango::Cairo::show_layout($context, $layout);
+}
+
+sub _make_layout {
+    my ($self, $comp) = @_;
+
+    my $bbox = $comp->inside_bounding_box;
+
+    # my $height = $bbox->height;
+    # my $height2 = $height / 2;
+    # my $width = $bbox->width;
+    # my $width2 = $width / 2;
 
     my $context = $self->cairo;
 
@@ -337,49 +418,34 @@ sub _draw_textbox {
 
     my $pcontext = $layout->get_context;
 
-    # my $dir = $comp->direction;
-    # if($dir eq 'auto') {
-    #     $layout->set_auto_dir(1);
-    # } else {
-    #     $layout->set_auto_dir(0);
-    #     $pcontext->set_base_dir($dir);
-    # }
-
     $layout->set_width(Gtk2::Pango::units_from_double($bbox->width));
     $layout->set_height(Gtk2::Pango::units_from_double($bbox->height));
 
-    $context->set_source_rgba($comp->color->as_array_with_alpha);
+    # $context->set_source_rgba($comp->color->as_array_with_alpha);
 
-    # $pcontext->set_base_gravity('east');
-    # $pcontext->set_gravity_hint('strong');
-
-    # Gtk2::Pango::Cairo::update_context($context, $pcontext);
     Gtk2::Pango::Cairo::update_layout($context, $layout);
-    # $layout->context_changed;
 
-    my ($ink, $log) = $layout->get_pixel_extents;
+     # my ($ink, $log) = $layout->get_pixel_extents;
 
-    my $y = 0;
-    if($comp->vertical_alignment eq 'bottom') {
-        $y = $bbox->height - $log->{height};
-    } elsif($comp->vertical_alignment eq 'center') {
-        $y = $bbox->height / 2 - $log->{height} / 2;
-    }
+    # my $y = 0;
+    # if($comp->vertical_alignment eq 'bottom') {
+    #     $y = $height - $log->{height};
+    # } elsif($comp->vertical_alignment eq 'center') {
+    #     $y = $height2 - $log->{height} / 2;
+    # }
 
     # Rotation, for the future
     # $context->translate($bbox->width / 2, $bbox->height / 2);
     # $context->rotate(-3.14 / 2);
     # $context->translate(-$bbox->width / 2, -$bbox->height / 2);
 
-    # The extents reported here (x,y) are to the inked portion, not the
-    # full width in cases like centered text...
-    $context->move_to(0, $y);
-
-    use Data::Dumper;
-    print Dumper($log);
-    print Dumper($ink);
-    Gtk2::Pango::Cairo::show_layout($context, $layout);
+    return $layout;
+    # use Data::Dumper;
+    # print Dumper($log);
+    # print Dumper($ink);
+    # Gtk2::Pango::Cairo::show_layout($context, $layout);
 }
+
 
 sub _draw_arc {
     my ($self, $arc) = @_;
@@ -650,15 +716,11 @@ sub _resize {
 }
 
 sub get_text_bounding_box {
-    my ($self, $tb, $text) = @_;
+    my ($self, $tb) = @_;
 
     my $context = $self->cairo;
 
     my $font = $tb->font;
-
-    unless(defined($text)) {
-        $text = $tb->text;
-    }
 
     my $fontmap = Gtk2::Pango::Cairo::FontMap->get_default;
     $fontmap->set_resolution(72);
@@ -669,20 +731,20 @@ sub get_text_bounding_box {
     $pcontext->set_font_options($options);
 
     my $layout = Gtk2::Pango::Cairo::create_layout($context);
-    $layout->set_markup($text);
+    $layout->set_markup($tb->text);
     $layout->set_indent(Gtk2::Pango::units_from_double($tb->indent));
     $layout->set_alignment($tb->horizontal_alignment);
     $layout->set_justify($tb->justify);
     $layout->set_wrap($tb->wrap_mode);
     $layout->set_ellipsize($tb->ellipsize_mode);
 
-    my $dir = $tb->direction;
-    if($dir eq 'auto') {
-        $layout->set_auto_dir(1);
-    } else {
-        $layout->set_auto_dir(0);
-        $pcontext->set_base_dir($dir);
-    }
+    # my $dir = $tb->direction;
+    # if($dir eq 'auto') {
+    #     $layout->set_auto_dir(1);
+    # } else {
+    #     $layout->set_auto_dir(0);
+    #     $pcontext->set_base_dir($dir);
+    # }
 
     # $context->rotate(0.14);
     # $pcontext->set_base_gravity('south');
@@ -706,6 +768,15 @@ sub get_text_bounding_box {
     my $cb = $tbb;
 
     return ($cb, $tbb);
+}
+
+sub get_textbox_layout {
+    my ($self, $comp) = @_;
+
+    return Graphics::Primitive::Driver::CairoPango::TextLayout->new(
+        component => $comp
+        width => $comp->width
+    );
 }
 
 sub reset {
