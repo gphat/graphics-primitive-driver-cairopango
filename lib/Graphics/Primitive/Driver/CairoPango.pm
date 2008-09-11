@@ -774,7 +774,7 @@ sub get_textbox_layout {
     my ($self, $comp) = @_;
 
     return Graphics::Primitive::Driver::CairoPango::TextLayout->new(
-        component => $comp
+        component => $comp,
         width => $comp->width
     );
 }
@@ -890,6 +890,11 @@ two rectangles are actually the same object.
 
 If the optional angle is supplied the text will be rotated by the supplied
 amount in radians.
+
+=item I<get_textbox_layout ($font, $textbox)>
+
+Returns this driver's implementation of a
+L<TextLayout|Graphics::Primitive::Driver::TextLayout>.
 
 =item I<reset>
 

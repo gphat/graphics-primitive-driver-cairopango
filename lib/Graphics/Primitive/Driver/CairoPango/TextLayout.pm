@@ -57,7 +57,7 @@ sub slice {
     my $using = 0;
     my @lines;
     for(my $i = 0; $i < $lc; $i++) {
-        my $line = $layout->get_line($i);
+        my $line = $lay->get_line($i);
         my ($ink, $log) = $line->get_line_extents;
         my $lh = $log->{height};
         last if (($lh + $found) > $size);
