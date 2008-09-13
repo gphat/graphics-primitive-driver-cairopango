@@ -6,6 +6,7 @@ use Cairo;
 use Carp;
 use Geometry::Primitive::Point;
 use Geometry::Primitive::Rectangle;
+use Graphics::Primitive::Driver::CairoPango::TextLayout;
 use Gtk2;
 use Gtk2::Pango;
 use IO::File;
@@ -35,7 +36,7 @@ has 'cairo' => (
     clearer => 'clear_cairo',
     lazy => 1,
     default => sub {
-        my $self = shift;
+        my ($self) = @_;
         return Cairo::Context->create($self->surface);
     }
 );
@@ -305,8 +306,6 @@ sub _draw_textbox {
 
     $self->_draw_component($comp);
 
-    my $layout = $self->_make_layout($comp);
-
     my $bbox = $comp->inside_bounding_box;
 
     my $height = $bbox->height;
@@ -359,14 +358,14 @@ sub _draw_textbox {
     # Gtk2::Pango::Cairo::update_layout($context, $layout);
     # $layout->context_changed;
 
-    my ($ink, $log) = $layout->get_pixel_extents;
+    # my ($ink, $log) = $layout->get_pixel_extents;
 
-    my $y = 0;
-    if($comp->vertical_alignment eq 'bottom') {
-        $y = $height - $log->{height};
-    } elsif($comp->vertical_alignment eq 'center') {
-        $y = $height2 - $log->{height} / 2;
-    }
+    # my $y = 0;
+    # if($comp->vertical_alignment eq 'bottom') {
+    #     $y = $height - $log->{height};
+    # } elsif($comp->vertical_alignment eq 'center') {
+    #     $y = $height2 - $log->{height} / 2;
+    # }
 
     # Rotation, for the future
     # $context->translate($bbox->width / 2, $bbox->height / 2);
@@ -375,12 +374,18 @@ sub _draw_textbox {
 
     # The extents reported here (x,y) are to the inked portion, not the
     # full width in cases like centered text...
-    $context->move_to(0, $y);
+    $context->move_to(0, 0);#$y);
 
-    use Data::Dumper;
-    print Dumper($log);
-    print Dumper($ink);
-    Gtk2::Pango::Cairo::show_layout($context, $layout);
+    if(defined($comp->lines)) {
+        foreach my $line (@{ $comp->lines }) {
+            Gtk2::Pango::Cairo::show_layout_line($context, $line);
+        }
+    } else {
+        # my $layout = $self->_make_layout($comp);
+        my $layout = $comp->layout->_layout;
+        Gtk2::Pango::Cairo::update_layout($context, $layout);
+        Gtk2::Pango::Cairo::show_layout($context, $layout);
+    }
 }
 
 sub _make_layout {
@@ -773,10 +778,12 @@ sub get_text_bounding_box {
 sub get_textbox_layout {
     my ($self, $comp) = @_;
 
-    return Graphics::Primitive::Driver::CairoPango::TextLayout->new(
+    my $tl = Graphics::Primitive::Driver::CairoPango::TextLayout->new(
         component => $comp,
-        width => $comp->width
+        # width => $comp->width
     );
+    $tl->layout($self);
+    return $tl;
 }
 
 sub reset {

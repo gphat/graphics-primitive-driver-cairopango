@@ -1,5 +1,7 @@
-package Document::Writer::TextLayout;
+package Graphics::Primitive::Driver::CairoPango::TextLayout;
 use Moose;
+
+use Graphics::Primitive::TextBox;
 
 with 'Graphics::Primitive::Driver::TextLayout';
 
@@ -9,27 +11,13 @@ has '_layout' => (
     is => 'rw',
     isa => 'Gtk2::Pango::Layout',
 );
-has 'component' => (
-    is => 'rw',
-    isa => 'Graphics::Primitive::TextBox',
-    required => 1
-);
-has 'height' => (
-    is => 'rw',
-    isa => 'Num',
-    default => sub { -1 }
-);
-has 'width' => (
-    is => 'rw',
-    isa => 'Num',
-    required => 1
-);
 
 sub layout {
-    my ($self, $comp, $driver) = @_;
+    my ($self, $driver) = @_;
 
-    my $font = $self->font;
-    my $width = $self->width;
+    my $comp = $self->component;
+    my $font = $comp->font;
+    my $width = $comp->width;
 
     $self->_layout($driver->_make_layout($comp));
     my ($ink, $log) = $self->_layout->get_pixel_extents;
@@ -58,9 +46,10 @@ sub slice {
     my @lines;
     for(my $i = 0; $i < $lc; $i++) {
         my $line = $lay->get_line($i);
-        my ($ink, $log) = $line->get_line_extents;
+        my ($ink, $log) = $line->get_pixel_extents;
+
         my $lh = $log->{height};
-        last if (($lh + $found) > $size);
+        last if (($lh + $using) > $size);
         if($found > $offset) {
             push(@lines, $line);
             $using += $lh;
@@ -68,16 +57,11 @@ sub slice {
         $found += $lh;
     }
 
-    return Greenspan::Primitive::TextBox->new(
-        lines => \@lines,
+    return Graphics::Primitive::TextBox->new(
+        layout => $self,
         width => $self->width,
         height => $using
     );
-    # my %ret = (
-    #     size => $found,
-    #     lines => \@new
-    # );
-    # return \%ret;
 }
 
 no Moose;
