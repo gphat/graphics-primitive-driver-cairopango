@@ -33,15 +33,15 @@ sub slice {
     my ($self, $offset, $size) = @_;
 
     my $lay = $self->_layout;
+    my $comp = $self->component;
 
     unless(defined($size)) {
         # If there was no size, give them the whole shebang.
-        # my @lines = $lay->get_lines_readonly;
 
-        my $clone = $self->component->clone;
+        my $clone = $comp->clone;
         $clone->layout($self);
-        $clone->minimum_width($self->width);
-        $clone->minimum_height($self->height);
+        $clone->minimum_width($self->width + $comp->inside_width);
+        $clone->minimum_height($self->height + $comp->inside_height);
 
         return $clone;
     }
@@ -66,8 +66,8 @@ sub slice {
 
     return Graphics::Primitive::TextBox->new(
         layout => $self,
-        minimum_width => $self->width,
-        minimum_height => $using
+        minimum_width => $self->width + $comp->inside_width,
+        minimum_height => $using + $comp->inside_height
     );
 }
 

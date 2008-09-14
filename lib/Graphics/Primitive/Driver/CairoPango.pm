@@ -376,7 +376,9 @@ sub _make_layout {
     my $bbox = $comp->inside_bounding_box;
 
     $layout->set_width(Gtk2::Pango::units_from_double($bbox->width));
-    $layout->set_height(Gtk2::Pango::units_from_double($bbox->height));
+    if($bbox->height) {
+        $layout->set_height(Gtk2::Pango::units_from_double($bbox->height));
+    }
 
     Gtk2::Pango::Cairo::update_layout($context, $layout);
 
