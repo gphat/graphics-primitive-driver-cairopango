@@ -15,14 +15,16 @@ has '_layout' => (
 sub layout {
     my ($self, $driver) = @_;
 
-    unless(defined($self->component->text)) {
+    my $comp = $self->component;
+
+    unless(defined($comp->text)) {
         $self->height(0);
         return;
     }
 
-    my $comp = $self->component;
     my $font = $comp->font;
-    my $width = $comp->width;
+    my $width = $comp->width ? $comp->width : $comp->minimum_width;
+    $self->width($width);
 
     $self->_layout($driver->_make_layout($comp));
     my ($ink, $log) = $self->_layout->get_pixel_extents;

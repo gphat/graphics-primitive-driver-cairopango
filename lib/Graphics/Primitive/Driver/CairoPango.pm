@@ -368,7 +368,7 @@ sub _make_layout {
     $layout->set_ellipsize($comp->ellipsize_mode);
 
     if(defined($comp->line_height)) {
-        $layout->set_spacing(Gtk2::Pango::units_from_double($comp->line_height));
+        $layout->set_spacing(Gtk2::Pango::units_from_double($comp->line_height - $comp->font->size));
     }
 
     my $pcontext = $layout->get_context;
@@ -678,7 +678,6 @@ sub get_textbox_layout {
 
     my $tl = Graphics::Primitive::Driver::CairoPango::TextLayout->new(
         component => $comp,
-        # width => $comp->width
     );
     $tl->layout($self);
     return $tl;
