@@ -15,6 +15,11 @@ has '_layout' => (
 sub layout {
     my ($self, $driver) = @_;
 
+    unless(defined($self->component->text)) {
+        $self->height(0);
+        return;
+    }
+
     my $comp = $self->component;
     my $font = $comp->font;
     my $width = $comp->width;
@@ -31,12 +36,14 @@ sub slice {
 
     unless(defined($size)) {
         # If there was no size, give them the whole shebang.
-        my @lines = $lay->get_lines_readonly;
-        my $textbox = Graphics::Primitive::TextBox->new(
-            lines => \@lines,
-            width => $self->width,
-            height => $self->height
-        );
+        # my @lines = $lay->get_lines_readonly;
+
+        my $clone = $self->component->clone;
+        $clone->layout($self);
+        $clone->minimum_width($self->width);
+        $clone->minimum_height($self->height);
+
+        return $clone;
     }
 
     my $lc = $lay->get_line_count;
@@ -59,8 +66,8 @@ sub slice {
 
     return Graphics::Primitive::TextBox->new(
         layout => $self,
-        width => $self->width,
-        height => $using
+        minimum_width => $self->width,
+        minimum_height => $using
     );
 }
 

@@ -304,6 +304,8 @@ sub _draw_simple_border {
 sub _draw_textbox {
     my ($self, $comp) = @_;
 
+    return unless(defined($comp->text));
+
     $self->_draw_component($comp);
 
     my $bbox = $comp->inside_bounding_box;
@@ -315,48 +317,73 @@ sub _draw_textbox {
 
     my $context = $self->cairo;
 
-    # my $font = $comp->font;
-    # 
-    # my $fontmap = Gtk2::Pango::Cairo::FontMap->get_default;
-    # $fontmap->set_resolution(72);
-    # 
-    # my $desc = Gtk2::Pango::FontDescription->new;
-    # $desc->set_family($font->family);
-    # $desc->set_variant($font->variant);
-    # $desc->set_style($font->slant);
-    # $desc->set_weight($font->weight);
-    # 
-    # my $layout = Gtk2::Pango::Cairo::create_layout($context);
-    # 
-    # $layout->set_font_description($desc);
-    # $layout->set_markup($comp->text);
-    # $layout->set_indent(Gtk2::Pango::units_from_double($comp->indent));
-    # $layout->set_alignment($comp->horizontal_alignment);
-    # $layout->set_justify($comp->justify);
-    # $layout->set_wrap($comp->wrap_mode);
-    # $layout->set_ellipsize($comp->ellipsize_mode);
-    # 
-    # my $pcontext = $layout->get_context;
-
-    # my $dir = $comp->direction;
-    # if($dir eq 'auto') {
-    #     $layout->set_auto_dir(1);
-    # } else {
-    #     $layout->set_auto_dir(0);
-    #     $pcontext->set_base_dir($dir);
-    # }
-
-    # $layout->set_width(Gtk2::Pango::units_from_double($bbox->width));
-    # $layout->set_height(Gtk2::Pango::units_from_double($bbox->height));
-    # 
     $context->set_source_rgba($comp->color->as_array_with_alpha);
 
-    # $pcontext->set_base_gravity('east');
-    # $pcontext->set_gravity_hint('strong');
+    my $origin = $bbox->origin;
+    my $x = $origin->x;
+    my $y = $origin->y;
 
-    # Gtk2::Pango::Cairo::update_context($context, $pcontext);
-    # Gtk2::Pango::Cairo::update_layout($context, $layout);
-    # $layout->context_changed;
+    $context->move_to($x, $y);
+
+    if(defined($comp->lines)) {
+        foreach my $line (@{ $comp->lines }) {
+            my ($ink, $log) = $line->get_pixel_extents;
+            $context->rel_move_to($log->{x}, abs($log->{y}) - 1);
+            Gtk2::Pango::Cairo::show_layout_line($context, $line);
+            $context->rel_move_to(0, $log->{height} + $log->{y});
+        }
+    } else {
+        # my $layout = $self->_make_layout($comp);
+        my $layout = $comp->layout->_layout;
+        Gtk2::Pango::Cairo::update_layout($context, $layout);
+        Gtk2::Pango::Cairo::show_layout($context, $layout);
+    }
+}
+
+sub _make_layout {
+    my ($self, $comp) = @_;
+
+    my $context = $self->cairo;
+
+    my $font = $comp->font;
+
+    my $fontmap = Gtk2::Pango::Cairo::FontMap->get_default;
+    $fontmap->set_resolution(72);
+
+    my $desc = Gtk2::Pango::FontDescription->new;
+    $desc->set_family($font->family);
+    $desc->set_variant($font->variant);
+    $desc->set_style($font->slant);
+    $desc->set_weight($font->weight);
+    $desc->set_size(Gtk2::Pango::units_from_double($font->size));
+
+    my $layout = Gtk2::Pango::Cairo::create_layout($context);
+
+    $layout->set_font_description($desc);
+    $layout->set_markup($comp->text);
+    $layout->set_indent(Gtk2::Pango::units_from_double($comp->indent));
+    $layout->set_alignment($comp->horizontal_alignment);
+    $layout->set_justify($comp->justify);
+    $layout->set_wrap($comp->wrap_mode);
+    $layout->set_ellipsize($comp->ellipsize_mode);
+
+    if(defined($comp->line_height)) {
+        $layout->set_spacing(Gtk2::Pango::units_from_double($comp->line_height));
+    }
+
+    my $pcontext = $layout->get_context;
+
+    my $bbox = $comp->inside_bounding_box;
+
+    $layout->set_width(Gtk2::Pango::units_from_double($bbox->width));
+    $layout->set_height(Gtk2::Pango::units_from_double($bbox->height));
+
+    Gtk2::Pango::Cairo::update_layout($context, $layout);
+
+    # my $height = $bbox->height;
+    # my $height2 = $height / 2;
+    # my $width = $bbox->width;
+    # my $width2 = $width / 2;
 
     # my ($ink, $log) = $layout->get_pixel_extents;
 
@@ -372,83 +399,7 @@ sub _draw_textbox {
     # $context->rotate(-3.14 / 2);
     # $context->translate(-$bbox->width / 2, -$bbox->height / 2);
 
-    # The extents reported here (x,y) are to the inked portion, not the
-    # full width in cases like centered text...
-    $context->move_to(0, 0);#$y);
-
-    if(defined($comp->lines)) {
-        foreach my $line (@{ $comp->lines }) {
-            Gtk2::Pango::Cairo::show_layout_line($context, $line);
-        }
-    } else {
-        # my $layout = $self->_make_layout($comp);
-        my $layout = $comp->layout->_layout;
-        Gtk2::Pango::Cairo::update_layout($context, $layout);
-        Gtk2::Pango::Cairo::show_layout($context, $layout);
-    }
-}
-
-sub _make_layout {
-    my ($self, $comp) = @_;
-
-    my $bbox = $comp->inside_bounding_box;
-
-    # my $height = $bbox->height;
-    # my $height2 = $height / 2;
-    # my $width = $bbox->width;
-    # my $width2 = $width / 2;
-
-    my $context = $self->cairo;
-
-    my $font = $comp->font;
-
-    my $fontmap = Gtk2::Pango::Cairo::FontMap->get_default;
-    $fontmap->set_resolution(72);
-
-    my $desc = Gtk2::Pango::FontDescription->new;
-    $desc->set_family($font->family);
-    $desc->set_variant($font->variant);
-    $desc->set_style($font->slant);
-    $desc->set_weight($font->weight);
-
-    my $layout = Gtk2::Pango::Cairo::create_layout($context);
-
-    $layout->set_font_description($desc);
-    $layout->set_markup($comp->text);
-    $layout->set_indent(Gtk2::Pango::units_from_double($comp->indent));
-    $layout->set_alignment($comp->horizontal_alignment);
-    $layout->set_justify($comp->justify);
-    $layout->set_wrap($comp->wrap_mode);
-    $layout->set_ellipsize($comp->ellipsize_mode);
-
-    my $pcontext = $layout->get_context;
-
-    $layout->set_width(Gtk2::Pango::units_from_double($bbox->width));
-    $layout->set_height(Gtk2::Pango::units_from_double($bbox->height));
-
-    # $context->set_source_rgba($comp->color->as_array_with_alpha);
-
-    Gtk2::Pango::Cairo::update_layout($context, $layout);
-
-     # my ($ink, $log) = $layout->get_pixel_extents;
-
-    # my $y = 0;
-    # if($comp->vertical_alignment eq 'bottom') {
-    #     $y = $height - $log->{height};
-    # } elsif($comp->vertical_alignment eq 'center') {
-    #     $y = $height2 - $log->{height} / 2;
-    # }
-
-    # Rotation, for the future
-    # $context->translate($bbox->width / 2, $bbox->height / 2);
-    # $context->rotate(-3.14 / 2);
-    # $context->translate(-$bbox->width / 2, -$bbox->height / 2);
-
     return $layout;
-    # use Data::Dumper;
-    # print Dumper($log);
-    # print Dumper($ink);
-    # Gtk2::Pango::Cairo::show_layout($context, $layout);
 }
 
 
@@ -718,61 +669,6 @@ sub _resize {
     if(($self->width != $width) || ($self->height != $height)) {
         $self->surface->set_size($width, $height);
     }
-}
-
-sub get_text_bounding_box {
-    my ($self, $tb) = @_;
-
-    my $context = $self->cairo;
-
-    my $font = $tb->font;
-
-    my $fontmap = Gtk2::Pango::Cairo::FontMap->get_default;
-    $fontmap->set_resolution(72);
-
-    my $pcontext = $fontmap->create_context;
-
-    my $options = Cairo::FontOptions->create;
-    $pcontext->set_font_options($options);
-
-    my $layout = Gtk2::Pango::Cairo::create_layout($context);
-    $layout->set_markup($tb->text);
-    $layout->set_indent(Gtk2::Pango::units_from_double($tb->indent));
-    $layout->set_alignment($tb->horizontal_alignment);
-    $layout->set_justify($tb->justify);
-    $layout->set_wrap($tb->wrap_mode);
-    $layout->set_ellipsize($tb->ellipsize_mode);
-
-    # my $dir = $tb->direction;
-    # if($dir eq 'auto') {
-    #     $layout->set_auto_dir(1);
-    # } else {
-    #     $layout->set_auto_dir(0);
-    #     $pcontext->set_base_dir($dir);
-    # }
-
-    # $context->rotate(0.14);
-    # $pcontext->set_base_gravity('south');
-    # $pcontext->set_gravity_hint('strong');
-
-    Gtk2::Pango::Cairo::update_context($context, $pcontext);
-
-    Gtk2::Pango::Cairo::update_layout($context, $layout);
-    $layout->context_changed;
-    my ($ink, $log) = $layout->get_pixel_extents;
-
-    my $tbb = Geometry::Primitive::Rectangle->new(
-        origin  => Geometry::Primitive::Point->new(
-            x => $log->{x},
-            y => $log->{y},
-        ),
-        width   => $log->{width},
-        height  => $log->{height},
-    );
-
-    my $cb = $tbb;
-
-    return ($cb, $tbb);
 }
 
 sub get_textbox_layout {
