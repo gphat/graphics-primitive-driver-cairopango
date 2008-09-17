@@ -343,6 +343,14 @@ sub _draw_textbox {
 sub _make_layout {
     my ($self, $comp) = @_;
 
+    my $tl = Graphics::Primitive::Driver::CairoPango::TextLayout->new(
+        component => $comp,
+    );
+    unless(defined($comp->text)) {
+        $tl->height(0);
+        return $tl;
+    }
+
     my $context = $self->cairo;
 
     my $font = $comp->font;
@@ -373,12 +381,13 @@ sub _make_layout {
 
     my $pcontext = $layout->get_context;
 
-    my $bbox = $comp->inside_bounding_box;
+	my $width = $comp->width ? $comp->inside_width : $comp->minimum_inside_width;
+	$width = -1 if(!defined($width) || ($width == 0));
 
-    $layout->set_width(Gtk2::Pango::units_from_double($bbox->width));
-    if($bbox->height) {
-        $layout->set_height(Gtk2::Pango::units_from_double($bbox->height));
-    }
+    $layout->set_width(Gtk2::Pango::units_from_double($width));
+    # if($bbox->height) {
+    #     $layout->set_height(Gtk2::Pango::units_from_double($bbox->height));
+    # }
 
     Gtk2::Pango::Cairo::update_layout($context, $layout);
 
@@ -387,7 +396,7 @@ sub _make_layout {
     # my $width = $bbox->width;
     # my $width2 = $width / 2;
 
-    # my ($ink, $log) = $layout->get_pixel_extents;
+    my ($ink, $log) = $layout->get_pixel_extents;
 
     # my $y = 0;
     # if($comp->vertical_alignment eq 'bottom') {
@@ -401,7 +410,11 @@ sub _make_layout {
     # $context->rotate(-3.14 / 2);
     # $context->translate(-$bbox->width / 2, -$bbox->height / 2);
 
-    return $layout;
+	$tl->_layout($layout);
+	$tl->width($log->{width});
+	$tl->height($log->{height});
+
+	return $tl;
 }
 
 
@@ -676,10 +689,13 @@ sub _resize {
 sub get_textbox_layout {
     my ($self, $comp) = @_;
 
-    my $tl = Graphics::Primitive::Driver::CairoPango::TextLayout->new(
-        component => $comp,
-    );
-    $tl->layout($self);
+    # my $tl = Graphics::Primitive::Driver::CairoPango::TextLayout->new(
+    #     component => $comp,
+    # );
+    # $tl->layout($self);
+	my $tl = $self->_make_layout($comp);
+	print "### ".$tl->width."\n";
+	print "### ".$tl->height."\n";
     return $tl;
 }
 

@@ -12,25 +12,6 @@ has '_layout' => (
     isa => 'Gtk2::Pango::Layout',
 );
 
-sub layout {
-    my ($self, $driver) = @_;
-
-    my $comp = $self->component;
-
-    unless(defined($comp->text)) {
-        $self->height(0);
-        return;
-    }
-
-    my $font = $comp->font;
-    my $width = $comp->width ? $comp->width : $comp->minimum_width;
-    $self->width($width);
-
-    $self->_layout($driver->_make_layout($comp));
-    my ($ink, $log) = $self->_layout->get_pixel_extents;
-    $self->height($log->{height});
-}
-
 sub slice {
     my ($self, $offset, $size) = @_;
 
@@ -101,10 +82,6 @@ Set/Get this text layout's font.
 
 Get the height of this text layout.  Only useful after C<layout> has been
 called.
-
-=item I<layout>
-
-Lay out the text based on the provided attributes.
 
 =item I<lines>
 
