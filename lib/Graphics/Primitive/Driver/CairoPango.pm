@@ -310,11 +310,6 @@ sub _draw_textbox {
 
     my $bbox = $comp->inside_bounding_box;
 
-    my $height = $bbox->height;
-    my $height2 = $height / 2;
-    my $width = $bbox->width;
-    my $width2 = $width / 2;
-
     my $context = $self->cairo;
 
     $context->set_source_rgba($comp->color->as_array_with_alpha);
@@ -323,7 +318,14 @@ sub _draw_textbox {
     my $x = $origin->x;
     my $y = $origin->y;
 
-    $context->move_to($x, $y);
+	my $valign = $comp->vertical_alignment;
+	if($valign eq 'center') {
+		$context->move_to($x, $y + ($comp->height / 2) - ($comp->layout->height / 2));
+	} elsif($valign eq 'bottom') {
+    	$context->move_to($x, $y + $comp->height - ($comp->layout->height / 2));
+	} else {
+		$context->move_to($x, $y);
+	}
 
     if(defined($comp->lines)) {
         foreach my $line (@{ $comp->lines }) {
@@ -340,7 +342,7 @@ sub _draw_textbox {
     }
 }
 
-sub _make_layout {
+sub get_textbox_layout {
     my ($self, $comp) = @_;
 
     my $tl = Graphics::Primitive::Driver::CairoPango::TextLayout->new(
@@ -390,11 +392,6 @@ sub _make_layout {
     # }
 
     Gtk2::Pango::Cairo::update_layout($context, $layout);
-
-    # my $height = $bbox->height;
-    # my $height2 = $height / 2;
-    # my $width = $bbox->width;
-    # my $width2 = $width / 2;
 
     my ($ink, $log) = $layout->get_pixel_extents;
 
@@ -684,19 +681,6 @@ sub _resize {
     if(($self->width != $width) || ($self->height != $height)) {
         $self->surface->set_size($width, $height);
     }
-}
-
-sub get_textbox_layout {
-    my ($self, $comp) = @_;
-
-    # my $tl = Graphics::Primitive::Driver::CairoPango::TextLayout->new(
-    #     component => $comp,
-    # );
-    # $tl->layout($self);
-	my $tl = $self->_make_layout($comp);
-	print "### ".$tl->width."\n";
-	print "### ".$tl->height."\n";
-    return $tl;
 }
 
 sub reset {
