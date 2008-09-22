@@ -14,6 +14,7 @@ requires 'Moose' => '0.57';
 requires 'IO::File';
 requires 'Geometry::Primitive' => '0.10';
 requires 'Graphics::Primitive' => '0.29';
+requires 'Math::Complex' => '1.54';
 
 auto_install;
 
