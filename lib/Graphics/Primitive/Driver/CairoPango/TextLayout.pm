@@ -69,7 +69,11 @@ Graphics::Primitive::Driver::CairoPango::TextLayout - Text layout engine
 =head1 DESCRIPTION
 
 Implements L<Graphics::Primitive::Driver::TextLayout>.  Please refer to it's
-documentation.  For usage.
+documentation for usage.
+
+=head1 IMPLEMENTATION
+
+This text layout engine uses Pango to layout text.
 
 =head1 AUTHOR
 
