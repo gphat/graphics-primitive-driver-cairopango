@@ -49,8 +49,8 @@ sub slice {
 
     return Graphics::Primitive::TextBox->new(
         layout => $self,
-        minimum_width => $self->width + $comp->inside_width,
-        minimum_height => $using + $comp->inside_height
+        minimum_width => $self->width,
+        minimum_height => $using
     );
 }
 

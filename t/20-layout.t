@@ -36,17 +36,16 @@ my $tb = Graphics::Primitive::TextBox->new(
 );
 
 my $tl = $driver->get_textbox_layout($tb);
-$tl->layout($driver);
 
 my $ret = $tl->slice(0, 20);
 isa_ok($ret, 'Graphics::Primitive::TextBox');
-cmp_ok($ret->width, '>', 0, '0 offset, 20 size, width > 0');
-cmp_ok($ret->width, '<=', 80, '0 offset, 20 size, width <= 80');
-cmp_ok($ret->height, '>', 0, '0 offset, 20 size, > 0');
-cmp_ok($ret->height, '<=', 20, '0 offset, 20 size, <= 20');
+cmp_ok($ret->minimum_width, '>', 0, '0 offset, 20 size, width > 0');
+cmp_ok($ret->minimum_width, '<=', 80, '0 offset, 20 size, width <= 80');
+cmp_ok($ret->minimum_height, '>', 0, '0 offset, 20 size, > 0');
+cmp_ok($ret->minimum_height, '<=', 20, '0 offset, 20 size, <= 20');
 
 my $ret2 = $tl->slice($ret->height, 2);
-cmp_ok($ret2->height, '==', 0, 'previous offset, 2 size');
+cmp_ok($ret2->minimum_height, '==', 0, 'previous offset, 2 size');
 my $ret3 = $tl->slice($ret->height, 20);
-cmp_ok($ret3->height, '>', 0, 'previous offset, 20 size, > 0');
-cmp_ok($ret3->height, '<=', 20, 'previous offset, 20 size, <= 20');
+cmp_ok($ret3->minimum_height, '>', 0, 'previous offset, 20 size, > 0');
+cmp_ok($ret3->minimum_height, '<=', 20, 'previous offset, 20 size, <= 20');
