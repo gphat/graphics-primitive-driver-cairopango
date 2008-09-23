@@ -17,6 +17,10 @@ with 'Graphics::Primitive::Driver';
 our $AUTHORITY = 'cpan:GPHAT';
 our $VERSION = '0.2';
 
+enum 'Graphics::Primitive::Driver::CairoPango::AntialiasModes' => (
+    qw(default none gray subpixel)
+);
+
 enum 'Graphics::Primitive::Driver::CairoPango::Format' => (
     qw(PDF PS PNG SVG pdf ps png svg)
 );
@@ -31,14 +35,24 @@ has '_preserve_count' => (
     is  => 'rw',
     default => sub { 0 }
 );
+has 'antialias_mode' => (
+    is => 'rw',
+    isa => 'Graphics::Primitive::Driver::Cairo::AntialiasModes'
+);
 has 'cairo' => (
     is => 'rw',
     isa => 'Cairo::Context',
     clearer => 'clear_cairo',
     lazy => 1,
     default => sub {
-        my ($self) = @_;
-        return Cairo::Context->create($self->surface);
+        my $self = shift;
+        my $ctx = Cairo::Context->create($self->surface);
+
+        if(defined($self->antialias_mode)) {
+            $ctx->set_antialias($self->antialias_mode);
+        }
+
+        return $ctx;
     }
 );
 has 'format' => (

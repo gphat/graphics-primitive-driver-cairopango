@@ -1,5 +1,8 @@
 Revision history for Graphics-Primitive-Driver-CairoPango
 
+0.03
+  - Add antialias_mode attribute
+
 0.02
   - POD update
   - Dependency bumps
