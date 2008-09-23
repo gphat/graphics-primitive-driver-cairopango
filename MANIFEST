@@ -1,11 +1,8 @@
 Changes
-inc/Module/AutoInstall.pm
 inc/Module/Install.pm
-inc/Module/Install/AutoInstall.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
 inc/Module/Install/Fetch.pm
-inc/Module/Install/Include.pm
 inc/Module/Install/Makefile.pm
 inc/Module/Install/Metadata.pm
 inc/Module/Install/Win32.pm
@@ -13,9 +10,10 @@ inc/Module/Install/WriteAll.pm
 lib/Graphics/Primitive/Driver/CairoPango.pm
 lib/Graphics/Primitive/Driver/CairoPango/TextLayout.pm
 Makefile.PL
-MANIFEST
+MANIFEST			This list of files
 META.yml
 README
 t/00-load.t
+t/20-layout.t
 t/pod-coverage.t
 t/pod.t
