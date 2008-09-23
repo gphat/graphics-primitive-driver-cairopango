@@ -15,7 +15,7 @@ use Math::Trig ':pi';
 with 'Graphics::Primitive::Driver';
 
 our $AUTHORITY = 'cpan:GPHAT';
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 enum 'Graphics::Primitive::Driver::CairoPango::Format' => (
     qw(PDF PS PNG SVG pdf ps png svg)
