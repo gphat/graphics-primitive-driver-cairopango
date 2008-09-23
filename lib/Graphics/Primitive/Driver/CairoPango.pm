@@ -809,6 +809,11 @@ Creates a new Graphics::Primitive::Driver::CairoPango object.  Requires a format
 
 =over 4
 
+=item I<antialias_mode>
+
+Set/Get the antialias mode of this driver. Options are default, none, gray and
+subpixel.
+
 =item I<cairo>
 
 This driver's Cairo::Context object
