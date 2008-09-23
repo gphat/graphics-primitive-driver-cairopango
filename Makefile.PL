@@ -13,7 +13,7 @@ requires 'Gtk2' => '1.183';
 requires 'Moose' => '0.57';
 requires 'IO::File';
 requires 'Geometry::Primitive' => '0.12';
-requires 'Graphics::Primitive' => '0.31';
+requires 'Graphics::Primitive' => '0.32';
 requires 'Math::Complex' => '1.54';
 
 WriteAll;
