@@ -1,5 +1,8 @@
 Revision history for Graphics-Primitive-Driver-CairoPango
 
+0.04
+  - Optionally set some Pango values rather than using TextBox's defaults
+
 0.03
   - Add antialias_mode attribute
 

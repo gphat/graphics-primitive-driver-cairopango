@@ -15,7 +15,7 @@ use Math::Trig ':pi';
 with 'Graphics::Primitive::Driver';
 
 our $AUTHORITY = 'cpan:GPHAT';
-our $VERSION = '0.3';
+our $VERSION = '0.4';
 
 enum 'Graphics::Primitive::Driver::CairoPango::AntialiasModes' => (
     qw(default none gray subpixel)
@@ -389,8 +389,12 @@ sub get_textbox_layout {
     $layout->set_indent(Gtk2::Pango::units_from_double($comp->indent));
     $layout->set_alignment($comp->horizontal_alignment);
     $layout->set_justify($comp->justify);
-    $layout->set_wrap($comp->wrap_mode);
-    $layout->set_ellipsize($comp->ellipsize_mode);
+    if(defined($comp->wrap_mode)) {
+        $layout->set_wrap($comp->wrap_mode);
+    }
+    if(defined($comp->ellipsize_mode)) {
+        $layout->set_ellipsize($comp->ellipsize_mode);
+    }
 
     if(defined($comp->line_height)) {
         $layout->set_spacing(Gtk2::Pango::units_from_double($comp->line_height - $comp->font->size));
@@ -398,14 +402,19 @@ sub get_textbox_layout {
 
     my $pcontext = $layout->get_context;
 
+    if(defined($comp->direction)) {
+        $pcontext->set_base_dir($comp->direction);
+    }
+
 	my $width = $comp->width ? $comp->inside_width : $comp->minimum_inside_width;
 	$width = -1 if(!defined($width) || ($width == 0));
 
     $layout->set_width(Gtk2::Pango::units_from_double($width));
-    # if($bbox->height) {
-    #     $layout->set_height(Gtk2::Pango::units_from_double($bbox->height));
-    # }
+    if($comp->height) {
+        $layout->set_height(Gtk2::Pango::units_from_double($comp->height));
+    }
 
+    Gtk2::Pango::Cairo::update_context($context, $pcontext);
     Gtk2::Pango::Cairo::update_layout($context, $layout);
 
     my ($ink, $log) = $layout->get_pixel_extents;
@@ -424,6 +433,7 @@ sub get_textbox_layout {
 
 	$tl->_layout($layout);
 	$tl->width($log->{width});
+
 	$tl->height($log->{height});
 
 	return $tl;
