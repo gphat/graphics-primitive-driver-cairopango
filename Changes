@@ -1,5 +1,8 @@
 Revision history for Graphics-Primitive-Driver-CairoPango
 
+0.05
+  - Add Radial Gradient support
+
 0.04
   - Optionally set some Pango values rather than using TextBox's defaults
 

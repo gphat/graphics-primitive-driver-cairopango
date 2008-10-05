@@ -15,7 +15,7 @@ use Math::Trig ':pi';
 with 'Graphics::Primitive::Driver';
 
 our $AUTHORITY = 'cpan:GPHAT';
-our $VERSION = '0.4';
+our $VERSION = '0.5';
 
 enum 'Graphics::Primitive::Driver::CairoPango::AntialiasModes' => (
     qw(default none gray subpixel)
@@ -667,24 +667,32 @@ sub _do_fill {
     # FIXME Check::ISA?
     if($paint->isa('Graphics::Primitive::Paint::Gradient')) {
 
-        if($paint->style eq 'linear') {
-            my $patt = Cairo::LinearGradient->create(
+        my $patt;
+        if($paint->isa('Graphics::Primitive::Paint::Gradient::Linear')) {
+            $patt = Cairo::LinearGradient->create(
                 $paint->line->start->x, $paint->line->start->y,
                 $paint->line->end->x, $paint->line->end->y,
             );
-            foreach my $stop ($paint->stops) {
-                my $color = $paint->get_stop($stop);
-                $patt->add_color_stop_rgba(
-                    $stop, $color->red, $color->green,
-                    $color->blue, $color->alpha
-                );
-            }
-            $context->set_source($patt);
-        } elsif($paint->style eq 'radial') {
-            # TODO
+        } elsif($paint->isa('Graphics::Primitive::Paint::Gradient::Radial')) {
+            $patt = Cairo::RadialGradient->create(
+                $paint->start->origin->x, $paint->start->origin->y,
+                $paint->start->radius,
+                $paint->end->origin->x, $paint->end->origin->y,
+                $paint->end->radius
+            );
         } else {
-            croak('Unknown gradient type: '.$paint->style);
+            croak('Unknown gradient type: '.ref($paint));
         }
+
+        foreach my $stop ($paint->stops) {
+            my $color = $paint->get_stop($stop);
+            $patt->add_color_stop_rgba(
+                $stop, $color->red, $color->green,
+                $color->blue, $color->alpha
+            );
+        }
+        $context->set_source($patt);
+
     } elsif($paint->isa('Graphics::Primitive::Paint::Solid')) {
         $context->set_source_rgba($paint->color->as_array_with_alpha);
     }
