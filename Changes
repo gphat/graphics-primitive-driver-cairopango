@@ -1,5 +1,8 @@
 Revision history for Graphics-Primitive-Driver-CairoPango
 
+0.51
+  - Add new_sub_path before arc call, removing impossible-to-fix line segment
+
 0.05
   - Add Radial Gradient support
 

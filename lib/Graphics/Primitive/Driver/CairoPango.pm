@@ -15,7 +15,7 @@ use Math::Trig ':pi';
 with 'Graphics::Primitive::Driver';
 
 our $AUTHORITY = 'cpan:GPHAT';
-our $VERSION = '0.5';
+our $VERSION = '0.51';
 
 enum 'Graphics::Primitive::Driver::CairoPango::AntialiasModes' => (
     qw(default none gray subpixel)
@@ -484,6 +484,7 @@ sub _draw_circle {
 
     my $context = $self->cairo;
     my $o = $circle->origin;
+    $context->new_sub_path;
     $context->arc(
         $o->x, $o->y, $circle->radius, 0, pi2
     );
