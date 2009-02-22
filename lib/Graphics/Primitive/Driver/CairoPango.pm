@@ -15,7 +15,7 @@ use Math::Trig ':pi';
 with 'Graphics::Primitive::Driver';
 
 our $AUTHORITY = 'cpan:GPHAT';
-our $VERSION = '0.51';
+our $VERSION = '0.52';
 
 enum 'Graphics::Primitive::Driver::CairoPango::AntialiasModes' => (
     qw(default none gray subpixel)

@@ -18,13 +18,13 @@ sub slice {
     my $lay = $self->_layout;
     my $comp = $self->component;
 
-    unless(defined($size)) {
+    unless(defined($size) || ($size > $self->height)) {
         # If there was no size, give them the whole shebang.
 
         my $clone = $comp->clone;
         $clone->layout($self);
-        $clone->minimum_width($self->width + $comp->inside_width);
-        $clone->minimum_height($self->height + $comp->inside_height);
+        $clone->minimum_width($self->width + $comp->outside_width);
+        $clone->minimum_height($self->height + $comp->outside_height);
 
         return $clone;
     }
@@ -32,25 +32,28 @@ sub slice {
     my $lc = $lay->get_line_count;
 
     my $found = 0;
-    my $using = 0;
+    my $using = $comp->outside_height;
     my @lines;
     for(my $i = 0; $i < $lc; $i++) {
         my $line = $lay->get_line($i);
         my ($ink, $log) = $line->get_pixel_extents;
-
         my $lh = $log->{height};
+
         last if (($lh + $using) > $size);
-        if($found > $offset) {
+        if($found >= $offset) {
             push(@lines, $line);
             $using += $lh;
         }
         $found += $lh;
     }
 
-    return Graphics::Primitive::TextBox->new(
-        layout => $self,
-        minimum_width => $self->width,
-        minimum_height => $using
+    return $comp->clone(
+        height => $using,
+        lines => \@lines,
+        minimum_width => $self->width + $comp->outside_width,
+        minimum_height => $using,
+        prepared => 0,
+        width => $self->width + $comp->outside_width,
     );
 }
 
