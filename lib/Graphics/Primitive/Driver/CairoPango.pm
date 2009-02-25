@@ -15,7 +15,7 @@ use Math::Trig ':pi';
 with 'Graphics::Primitive::Driver';
 
 our $AUTHORITY = 'cpan:GPHAT';
-our $VERSION = '0.52';
+our $VERSION = '0.53';
 
 enum 'Graphics::Primitive::Driver::CairoPango::AntialiasModes' => (
     qw(default none gray subpixel)
@@ -324,6 +324,7 @@ sub _draw_textbox {
     $self->_draw_component($comp);
 
     my $bbox = $comp->inside_bounding_box;
+    my $width = $bbox->width;
 
     my $context = $self->cairo;
 
@@ -333,24 +334,40 @@ sub _draw_textbox {
     my $x = $origin->x;
     my $y = $origin->y;
 
-	my $valign = $comp->vertical_alignment;
-	if($valign eq 'center') {
-		$context->move_to($x, $y + ($comp->height / 2) - ($comp->layout->height / 2));
-	} elsif($valign eq 'bottom') {
-    	$context->move_to($x, $y + $comp->height - ($comp->layout->height / 2));
-	} else {
-		$context->move_to($x, $y);
-	}
-
     if(defined($comp->lines)) {
-        foreach my $line (@{ $comp->lines }) {
-            my ($ink, $log) = $line->get_pixel_extents;
-            $context->rel_move_to($log->{x}, abs($log->{y}) - 1);
+
+        my $start = $comp->lines->{start};
+        my $count = $comp->lines->{count};
+        my $endline = $start + $count;
+
+        my $layout = $comp->layout->_layout;
+        my $iter = $layout->get_iter;
+
+        my $startpos = 0;
+
+        my $line_index = 0;
+        while($line_index < $endline) {
+            if($count < $start) {
+                $iter->next_line;
+                $line_index++;
+                next;
+            }
+
+            my $line = $iter->get_line_readonly;
+            my ($ink, $log) = $iter->get_line_extents;
+            my $baseline = $iter->get_baseline;
+
+            if($count == 0) {
+                $startpos = $log->{y} / 1024;
+            }
+            $context->move_to($x + ($log->{x} / 1024), $baseline / 1024 - $startpos + $y);
+
             Gtk2::Pango::Cairo::show_layout_line($context, $line);
-            $context->rel_move_to(0, $log->{height} + $log->{y});
-        }
+            $line_index++;
+            $iter->next_line;
+        };
     } else {
-        # my $layout = $self->_make_layout($comp);
+        $context->move_to($x, $y);
         my $layout = $comp->layout->_layout;
         Gtk2::Pango::Cairo::update_layout($context, $layout);
         Gtk2::Pango::Cairo::show_layout($context, $layout);

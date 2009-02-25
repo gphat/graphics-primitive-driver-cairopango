@@ -1,5 +1,8 @@
 Revision history for Graphics-Primitive-Driver-CairoPango
 
+0.53
+  - Rewrite Pango text rendering, works much better
+
 0.52
   - Fix TextBoxes generated from TextLayout
 

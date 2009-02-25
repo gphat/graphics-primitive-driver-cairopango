@@ -18,14 +18,14 @@ sub slice {
     my $lay = $self->_layout;
     my $comp = $self->component;
 
-    unless(defined($size) || ($size > $self->height)) {
+    if(!defined($size) || ($size > $self->height)) {
         # If there was no size, give them the whole shebang.
-
         my $clone = $comp->clone;
         $clone->layout($self);
         $clone->minimum_width($self->width + $comp->outside_width);
         $clone->minimum_height($self->height + $comp->outside_height);
-
+        $clone->width($self->width + $comp->outside_width);
+        $clone->height($self->height + $comp->outside_height);
         return $clone;
     }
 
@@ -34,14 +34,20 @@ sub slice {
     my $found = 0;
     my $using = $comp->outside_height;
     my @lines;
+
+    my $start = undef;
+    my $count = 0;
     for(my $i = 0; $i < $lc; $i++) {
-        my $line = $lay->get_line($i);
+        my $line = $lay->get_line_readonly($i);
         my ($ink, $log) = $line->get_pixel_extents;
         my $lh = $log->{height};
 
         last if (($lh + $using) > $size);
         if($found >= $offset) {
-            push(@lines, $line);
+            unless(defined($start)) {
+                $start = $i;
+            }
+            $count++;
             $using += $lh;
         }
         $found += $lh;
@@ -49,7 +55,8 @@ sub slice {
 
     return $comp->clone(
         height => $using,
-        lines => \@lines,
+        layout => $self,
+        lines => { start => $start , count => $count },
         minimum_width => $self->width + $comp->outside_width,
         minimum_height => $using,
         prepared => 0,
