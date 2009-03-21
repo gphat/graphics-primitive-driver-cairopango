@@ -1,5 +1,10 @@
 Revision history for Graphics-Primitive-Driver-CairoPango
 
+0.54
+  - Switch to Gtk-less Pango bindings
+  - Stop using units_from_double, as I don't know what it's doing and it was
+    breaking stuff
+
 0.53
   - Rewrite Pango text rendering, works much better
 

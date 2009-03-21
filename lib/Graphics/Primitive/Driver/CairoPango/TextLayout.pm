@@ -5,11 +5,11 @@ use Graphics::Primitive::TextBox;
 
 with 'Graphics::Primitive::Driver::TextLayout';
 
-use Gtk2::Pango;
+use Pango;
 
 has '_layout' => (
     is => 'rw',
-    isa => 'Gtk2::Pango::Layout',
+    isa => 'Pango::Layout',
 );
 
 sub slice {

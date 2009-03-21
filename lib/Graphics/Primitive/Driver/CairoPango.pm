@@ -7,15 +7,14 @@ use Carp;
 use Geometry::Primitive::Point;
 use Geometry::Primitive::Rectangle;
 use Graphics::Primitive::Driver::CairoPango::TextLayout;
-use Gtk2;
-use Gtk2::Pango;
+use Pango;
 use IO::File;
 use Math::Trig ':pi';
 
 with 'Graphics::Primitive::Driver';
 
 our $AUTHORITY = 'cpan:GPHAT';
-our $VERSION = '0.53';
+our $VERSION = '0.54';
 
 enum 'Graphics::Primitive::Driver::CairoPango::AntialiasModes' => (
     qw(default none gray subpixel)
@@ -362,15 +361,15 @@ sub _draw_textbox {
             }
             $context->move_to($x + ($log->{x} / 1024), $baseline / 1024 - $startpos + $y);
 
-            Gtk2::Pango::Cairo::show_layout_line($context, $line);
+            Pango::Cairo::show_layout_line($context, $line);
             $line_index++;
             $iter->next_line;
         };
     } else {
         $context->move_to($x, $y);
         my $layout = $comp->layout->_layout;
-        Gtk2::Pango::Cairo::update_layout($context, $layout);
-        Gtk2::Pango::Cairo::show_layout($context, $layout);
+        Pango::Cairo::update_layout($context, $layout);
+        Pango::Cairo::show_layout($context, $layout);
     }
 }
 
@@ -389,21 +388,21 @@ sub get_textbox_layout {
 
     my $font = $comp->font;
 
-    my $fontmap = Gtk2::Pango::Cairo::FontMap->get_default;
+    my $fontmap = Pango::Cairo::FontMap->get_default;
     $fontmap->set_resolution(72);
 
-    my $desc = Gtk2::Pango::FontDescription->new;
+    my $desc = Pango::FontDescription->new;
     $desc->set_family($font->family);
     $desc->set_variant($font->variant);
     $desc->set_style($font->slant);
     $desc->set_weight($font->weight);
-    $desc->set_size(Gtk2::Pango::units_from_double($font->size));
+    $desc->set_size(Pango::units_from_double($font->size));
 
-    my $layout = Gtk2::Pango::Cairo::create_layout($context);
+    my $layout = Pango::Cairo::create_layout($context);
 
     $layout->set_font_description($desc);
     $layout->set_markup($comp->text);
-    $layout->set_indent(Gtk2::Pango::units_from_double($comp->indent));
+    $layout->set_indent(Pango::units_from_double($comp->indent));
     $layout->set_alignment($comp->horizontal_alignment);
     $layout->set_justify($comp->justify);
     if(defined($comp->wrap_mode)) {
@@ -414,7 +413,7 @@ sub get_textbox_layout {
     }
 
     if(defined($comp->line_height)) {
-        $layout->set_spacing(Gtk2::Pango::units_from_double($comp->line_height - $comp->font->size));
+        $layout->set_spacing(Pango::units_from_double($comp->line_height - $comp->font->size));
     }
 
     my $pcontext = $layout->get_context;
@@ -426,13 +425,13 @@ sub get_textbox_layout {
 	my $width = $comp->width ? $comp->inside_width : $comp->minimum_inside_width;
 	$width = -1 if(!defined($width) || ($width == 0));
 
-    $layout->set_width(Gtk2::Pango::units_from_double($width));
+    $layout->set_width($width);
     if($comp->height) {
-        $layout->set_height(Gtk2::Pango::units_from_double($comp->height));
+        $layout->set_height($comp->height);
     }
 
-    Gtk2::Pango::Cairo::update_context($context, $pcontext);
-    Gtk2::Pango::Cairo::update_layout($context, $layout);
+    Pango::Cairo::update_context($context, $pcontext);
+    Pango::Cairo::update_layout($context, $layout);
 
     my ($ink, $log) = $layout->get_pixel_extents;
 
@@ -810,9 +809,8 @@ Graphics::Primitive::Driver::CairoPango - Cairo/Pango backend for Graphics::Prim
 =head1 DESCRIPTION
 
 This module draws Graphics::Primitive objects using Cairo and Pango.  This
-is a seperate distribution because the current Pango bindings require
-GTK+.  The Pango specific bits will be rolled into the normal Cairo driver
-when this changes.
+is a separate distribution due to the Pango requirement.  The Pango specific
+bits will be rolled into the normal Cairo driver at some point.
 
 =head1 IMPLEMENTATION DETAILS
 
