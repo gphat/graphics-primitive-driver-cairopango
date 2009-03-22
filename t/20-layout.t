@@ -1,7 +1,7 @@
 use strict;
 use lib qw(t t/lib);
 
-use Test::More tests => 8;
+use Test::More tests => 7;
 
 use Graphics::Color::RGB;
 use Graphics::Primitive::Font;
@@ -31,7 +31,7 @@ my $tb = Graphics::Primitive::TextBox->new(
     color => Graphics::Color::RGB->new,
     width => 80,
     height => 500,
-    font => Graphics::Primitive::Font->new,
+    font => Graphics::Primitive::Font->new(size => 12),
     text => $text
 );
 
@@ -40,12 +40,17 @@ my $tl = $driver->get_textbox_layout($tb);
 my $ret = $tl->slice(0, 20);
 isa_ok($ret, 'Graphics::Primitive::TextBox');
 cmp_ok($ret->minimum_width, '>', 0, '0 offset, 20 size, width > 0');
-cmp_ok($ret->minimum_width, '<=', 80, '0 offset, 20 size, width <= 80');
 cmp_ok($ret->minimum_height, '>', 0, '0 offset, 20 size, > 0');
 cmp_ok($ret->minimum_height, '<=', 20, '0 offset, 20 size, <= 20');
 
 my $ret2 = $tl->slice($ret->height, 2);
-cmp_ok($ret2->minimum_height, '==', 0, 'previous offset, 2 size');
+ok(!defined($ret2), 'previous offset, 2 size');
 my $ret3 = $tl->slice($ret->height, 20);
 cmp_ok($ret3->minimum_height, '>', 0, 'previous offset, 20 size, > 0');
 cmp_ok($ret3->minimum_height, '<=', 20, 'previous offset, 20 size, <= 20');
+
+my $ret4 = $tl->slice($ret->height + $ret3->height, 20);
+cmp_ok($ret4->minimum_height, '<=', 20, 'last 2 offset, 20 size, <= 20');
+
+my $ret5 = $tl->slice(300, 100);
+cmp_ok($ret5->minimum_height, '<=', 100, 'big offset slice, <= 300');

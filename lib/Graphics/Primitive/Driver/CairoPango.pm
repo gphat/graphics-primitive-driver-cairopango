@@ -14,7 +14,7 @@ use Math::Trig ':pi';
 with 'Graphics::Primitive::Driver';
 
 our $AUTHORITY = 'cpan:GPHAT';
-our $VERSION = '0.54';
+our $VERSION = '0.55';
 
 enum 'Graphics::Primitive::Driver::CairoPango::AntialiasModes' => (
     qw(default none gray subpixel)
@@ -334,7 +334,6 @@ sub _draw_textbox {
     my $y = $origin->y;
 
     if(defined($comp->lines)) {
-
         my $start = $comp->lines->{start};
         my $count = $comp->lines->{count};
         my $endline = $start + $count;
@@ -346,7 +345,7 @@ sub _draw_textbox {
 
         my $line_index = 0;
         while($line_index < $endline) {
-            if($count < $start) {
+            if($line_index < $start) {
                 $iter->next_line;
                 $line_index++;
                 next;
@@ -356,9 +355,10 @@ sub _draw_textbox {
             my ($ink, $log) = $iter->get_line_extents;
             my $baseline = $iter->get_baseline;
 
-            if($count == 0) {
+            if($start == $line_index) {
                 $startpos = $log->{y} / 1024;
             }
+
             $context->move_to($x + ($log->{x} / 1024), $baseline / 1024 - $startpos + $y);
 
             Pango::Cairo::show_layout_line($context, $line);
@@ -425,9 +425,9 @@ sub get_textbox_layout {
 	my $width = $comp->width ? $comp->inside_width : $comp->minimum_inside_width;
 	$width = -1 if(!defined($width) || ($width == 0));
 
-    $layout->set_width($width);
+    $layout->set_width(Pango::units_from_double($width));
     if($comp->height) {
-        $layout->set_height($comp->height);
+        $layout->set_height(Pango::units_from_double($comp->height));
     }
 
     Pango::Cairo::update_context($context, $pcontext);

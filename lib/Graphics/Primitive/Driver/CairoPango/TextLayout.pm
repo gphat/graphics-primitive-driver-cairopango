@@ -18,8 +18,9 @@ sub slice {
     my $lay = $self->_layout;
     my $comp = $self->component;
 
-    if(!defined($size) || ($size > $self->height)) {
-        # If there was no size, give them the whole shebang.
+    if(!defined($size) || ($size > $self->height && !$offset)) {
+        # If there was no size or there was a size bigger than this textbox
+        # with no offset, give them the whole shebang
         my $clone = $comp->clone;
         $clone->layout($self);
         $clone->minimum_width($self->width + $comp->outside_width);
@@ -33,6 +34,10 @@ sub slice {
 
     my $found = 0;
     my $using = $comp->outside_height;
+    # This component is too big to fit!
+    if($using >= $size) {
+        return undef;
+    }
     my @lines;
 
     my $start = undef;
@@ -43,7 +48,7 @@ sub slice {
         my $lh = $log->{height};
 
         last if (($lh + $using) > $size);
-        if($found >= $offset) {
+        if(($found + $using) >= $offset) {
             unless(defined($start)) {
                 $start = $i;
             }
@@ -51,6 +56,11 @@ sub slice {
             $using += $lh;
         }
         $found += $lh;
+    }
+
+    # We didn't find any lines that fit, so just return nothing
+    if($count == 0) {
+        return undef;
     }
 
     return $comp->clone(

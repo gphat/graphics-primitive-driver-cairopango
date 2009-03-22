@@ -1,5 +1,12 @@
 Revision history for Graphics-Primitive-Driver-CairoPango
 
+0.55
+  - Turn units_from_double back on, since it apparently holds the fabric of
+    universe together
+  - Don't return useless components from a TextLayout slice
+  - Adjust lots of little indexes here and there to fix various off-by-one
+    style problems
+
 0.54
   - Switch to Gtk-less Pango bindings
   - Stop using units_from_double, as I don't know what it's doing and it was
