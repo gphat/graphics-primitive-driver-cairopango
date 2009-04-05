@@ -1,7 +1,7 @@
 use strict;
 use lib qw(t t/lib);
 
-use Test::More tests => 7;
+use Test::More tests => 9;
 
 use Graphics::Color::RGB;
 use Graphics::Primitive::Font;
