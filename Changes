@@ -1,5 +1,9 @@
 Revision history for Graphics-Primitive-Driver-CairoPango
 
+0.56
+  - Fix busted test
+  - Inherit from Cairo driver, no sense duplicating all that code
+
 0.55
   - Turn units_from_double back on, since it apparently holds the fabric of
     universe together

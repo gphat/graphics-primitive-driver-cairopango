@@ -14,6 +14,7 @@ requires 'Moose' => '0.57';
 requires 'IO::File';
 requires 'Geometry::Primitive' => '0.12';
 requires 'Graphics::Primitive' => '0.35';
+requires 'Graphics::Primitive::Driver::Cairo' => '0.34';
 requires 'Math::Complex' => '1.54';
 
 WriteAll;
