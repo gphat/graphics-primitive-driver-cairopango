@@ -16,7 +16,7 @@ extends 'Graphics::Primitive::Driver::Cairo';
 # with 'Graphics::Primitive::Driver';
 
 our $AUTHORITY = 'cpan:GPHAT';
-our $VERSION = '0.56';
+our $VERSION = '0.57';
 
 enum 'Graphics::Primitive::Driver::CairoPango::AntialiasModes' => (
     qw(default none gray subpixel)
