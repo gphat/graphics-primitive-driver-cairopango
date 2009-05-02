@@ -1,5 +1,9 @@
 Revision history for Graphics-Primitive-Driver-CairoPango
 
+0.57
+  - Proper text rotation
+  - Depend on latest Cairo driver
+
 0.56
   - Fix busted test
   - Inherit from Cairo driver, no sense duplicating all that code

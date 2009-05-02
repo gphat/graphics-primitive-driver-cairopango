@@ -31,12 +31,14 @@ sub _draw_textbox {
 
     return unless(defined($comp->text));
 
+    my $context = $self->cairo;
+
+    $context->save;
     $self->_draw_component($comp);
+    $context->restore;
 
     my $bbox = $comp->inside_bounding_box;
     my $width = $bbox->width;
-
-    my $context = $self->cairo;
 
     $context->set_source_rgba($comp->color->as_array_with_alpha);
 
@@ -77,8 +79,26 @@ sub _draw_textbox {
             $iter->next_line;
         };
     } else {
-        $context->move_to($x, $y);
         my $layout = $comp->layout->_layout;
+
+        my $angle = $comp->angle;
+        if($angle) {
+            my $tw2 = $comp->width / 2;
+            my $th2 = $comp->height / 2;
+
+            $context->translate($tw2, $th2);
+            $context->rotate($angle);
+            $context->translate(-$tw2, -$th2);
+
+            # Get the un-rotated extents so we can position it
+            my ($ink, $log) = $layout->get_pixel_extents;
+            $context->move_to(
+                $tw2 - $log->{width} / 2,
+                $th2 - $log->{height} / 2
+            );
+        } else {
+            $context->move_to($x, $y);
+        }
         Pango::Cairo::update_layout($context, $layout);
         Pango::Cairo::show_layout($context, $layout);
     }
@@ -141,10 +161,34 @@ sub get_textbox_layout {
         $layout->set_height(Pango::units_from_double($comp->height));
     }
 
-    Pango::Cairo::update_context($context, $pcontext);
-    Pango::Cairo::update_layout($context, $layout);
+    if($comp->angle) {
+        $context->save;
 
-    my ($ink, $log) = $layout->get_pixel_extents;
+        my $tw2 = $comp->width / 2;
+        my $th2 = $comp->height / 2;
+
+        $context->translate($tw2, $th2);
+        $context->rotate($comp->angle);
+        $context->translate(-$tw2, -$th2);
+
+        Pango::Cairo::update_context($context, $pcontext);
+        Pango::Cairo::update_layout($context, $layout);
+
+        my ($rw, $rh) = $self->_get_bounding_box($context, $layout);
+
+        $tl->width($rw);
+        $tl->height($rh);
+
+        $context->restore;
+    } else {
+
+        Pango::Cairo::update_context($context, $pcontext);
+        Pango::Cairo::update_layout($context, $layout);
+
+        my ($ink, $log) = $layout->get_pixel_extents;
+        $tl->width($log->{width});
+        $tl->height($log->{height});
+    }
 
     # my $y = 0;
     # if($comp->vertical_alignment eq 'bottom') {
@@ -153,17 +197,52 @@ sub get_textbox_layout {
     #     $y = $height2 - $log->{height} / 2;
     # }
 
-    # Rotation, for the future
-    # $context->translate($bbox->width / 2, $bbox->height / 2);
-    # $context->rotate(-3.14 / 2);
-    # $context->translate(-$bbox->width / 2, -$bbox->height / 2);
+    $tl->_layout($layout);
 
-	$tl->_layout($layout);
-	$tl->width($log->{width});
+    return $tl;
+}
 
-	$tl->height($log->{height});
+sub _get_bounding_box {
+    my ($self, $context, $layout) = @_;
 
-	return $tl;
+    my ($lw, $lh) = Pango::Layout::get_size($layout);
+
+    my $matrix = $context->get_matrix;
+    my @corners = ([0,0], [$lw/1024,0], [$lw/1024,$lh/1024], [0,$lh/1024]);
+
+    # Transform each of the four corners, the find the maximum X and Y
+    # coordinates to create a bounding box
+
+    my @points;
+    foreach my $pt (@corners) {
+        my ($x, $y) = $matrix->transform_point($pt->[0], $pt->[1]);
+        push(@points, [ $x, $y ]);
+    }
+
+    my $maxX = $points[0]->[0];
+    my $maxY = $points[0]->[1];
+    my $minX = $points[0]->[0];
+    my $minY = $points[0]->[1];
+
+    foreach my $pt (@points) {
+
+        if($pt->[0] > $maxX) {
+            $maxX = $pt->[0];
+        } elsif($pt->[0] < $minX) {
+            $minX = $pt->[0];
+        }
+
+        if($pt->[1] > $maxY) {
+            $maxY = $pt->[1];
+        } elsif($pt->[1] < $minY) {
+            $minY = $pt->[1];
+        }
+    }
+
+    my $bw = $maxX - $minX;
+    my $bh = $maxY - $minY;
+
+    return ($bw, $bh);
 }
 
 no Moose;
@@ -260,21 +339,6 @@ Draws the specified component.  Container's components are drawn recursively.
 =item I<format>
 
 Get the format for this driver.
-
-=item I<get_text_bounding_box ($font, $text, $angle)>
-
-Returns two L<Rectangles|Graphics::Primitive::Rectangle> that encloses the
-supplied text. The origin's x and y maybe negative, meaning that the glyphs in
-the text extending left of x or above y.
-
-The first rectangle is the bounding box required for a container that wants to
-contain the text.  The second box is only useful if an optional angle is
-provided.  This second rectangle is the bounding box of the un-rotated text
-that allows for a controlled rotation.  If no angle is supplied then the
-two rectangles are actually the same object.
-
-If the optional angle is supplied the text will be rotated by the supplied
-amount in radians.
 
 =item I<get_textbox_layout ($font, $textbox)>
 
