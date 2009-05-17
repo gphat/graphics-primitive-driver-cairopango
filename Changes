@@ -1,5 +1,9 @@
 Revision history for Graphics-Primitive-Driver-CairoPango
 
+0.59
+  - Remove accidental debugging code
+  - README
+
 0.58
   - Vertical alignment fixes
 

@@ -161,9 +161,6 @@ sub get_textbox_layout {
 
     my $width = $comp->width ? $comp->inside_width : $comp->minimum_inside_width;
     $width = -1 if(!defined($width) || ($width == 0));
-    if($comp->class eq 'abil-mod') {
-        print ":: $width\n";
-    }
     $layout->set_width(Pango::units_from_double($width));
 
     if($comp->height) {
