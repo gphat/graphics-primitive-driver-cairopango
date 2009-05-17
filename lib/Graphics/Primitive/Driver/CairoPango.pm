@@ -16,7 +16,7 @@ extends 'Graphics::Primitive::Driver::Cairo';
 # with 'Graphics::Primitive::Driver';
 
 our $AUTHORITY = 'cpan:GPHAT';
-our $VERSION = '0.57';
+our $VERSION = '0.58';
 
 enum 'Graphics::Primitive::Driver::CairoPango::AntialiasModes' => (
     qw(default none gray subpixel)
@@ -97,6 +97,12 @@ sub _draw_textbox {
                 $th2 - $log->{height} / 2
             );
         } else {
+            my ($ink, $log) = $layout->get_pixel_extents;
+            if($comp->vertical_alignment eq 'bottom') {
+                $y = $bbox->height - $log->{height} / 2;
+            } elsif($comp->vertical_alignment eq 'center') {
+                $y = $bbox->height / 2;
+            }
             $context->move_to($x, $y);
         }
         Pango::Cairo::update_layout($context, $layout);
@@ -153,10 +159,13 @@ sub get_textbox_layout {
         $pcontext->set_base_dir($comp->direction);
     }
 
-	my $width = $comp->width ? $comp->inside_width : $comp->minimum_inside_width;
-	$width = -1 if(!defined($width) || ($width == 0));
-
+    my $width = $comp->width ? $comp->inside_width : $comp->minimum_inside_width;
+    $width = -1 if(!defined($width) || ($width == 0));
+    if($comp->class eq 'abil-mod') {
+        print ":: $width\n";
+    }
     $layout->set_width(Pango::units_from_double($width));
+
     if($comp->height) {
         $layout->set_height(Pango::units_from_double($comp->height));
     }
@@ -186,16 +195,10 @@ sub get_textbox_layout {
         Pango::Cairo::update_layout($context, $layout);
 
         my ($ink, $log) = $layout->get_pixel_extents;
+
         $tl->width($log->{width});
         $tl->height($log->{height});
     }
-
-    # my $y = 0;
-    # if($comp->vertical_alignment eq 'bottom') {
-    #     $y = $height - $log->{height};
-    # } elsif($comp->vertical_alignment eq 'center') {
-    #     $y = $height2 - $log->{height} / 2;
-    # }
 
     $tl->_layout($layout);
 

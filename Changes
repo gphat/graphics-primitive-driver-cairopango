@@ -1,5 +1,8 @@
 Revision history for Graphics-Primitive-Driver-CairoPango
 
+0.58
+  - Vertical alignment fixes
+
 0.57
   - Proper text rotation
   - Depend on latest Cairo driver
