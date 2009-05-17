@@ -10,11 +10,11 @@ test_requires 'File::Spec';
 
 requires 'Cairo' => '1.061';
 requires 'Pango' => '1.220';
-requires 'Moose' => '0.76';
+requires 'Moose' => '0.79';
 requires 'IO::File';
-requires 'Geometry::Primitive' => '0.12';
-requires 'Graphics::Primitive' => '0.41';
-requires 'Graphics::Primitive::Driver::Cairo' => '0.37';
+requires 'Geometry::Primitive' => '0.13';
+requires 'Graphics::Primitive' => '0.43';
+requires 'Graphics::Primitive::Driver::Cairo' => '0.38';
 requires 'Math::Complex' => '1.56';
 
 WriteAll;
