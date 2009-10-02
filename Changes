@@ -2,6 +2,7 @@ Revision history for Graphics-Primitive-Driver-CairoPango
 
 0.60    October 2nd, 2009
   - Add support for new antialias/subpixel/hint attributes of Font
+  - Depend on latest Graphics::Primitive
 
 0.59
   - Remove accidental debugging code

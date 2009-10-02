@@ -13,7 +13,7 @@ requires 'Pango' => '1.220';
 requires 'Moose' => '0.79';
 requires 'IO::File';
 requires 'Geometry::Primitive' => '0.13';
-requires 'Graphics::Primitive' => '0.43';
+requires 'Graphics::Primitive' => '0.45';
 requires 'Graphics::Primitive::Driver::Cairo' => '0.38';
 requires 'Math::Complex' => '1.56';
 
