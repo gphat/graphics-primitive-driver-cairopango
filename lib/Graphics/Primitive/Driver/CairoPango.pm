@@ -16,7 +16,7 @@ extends 'Graphics::Primitive::Driver::Cairo';
 # with 'Graphics::Primitive::Driver';
 
 our $AUTHORITY = 'cpan:GPHAT';
-our $VERSION = '0.59';
+our $VERSION = '0.60';
 
 enum 'Graphics::Primitive::Driver::CairoPango::AntialiasModes' => (
     qw(default none gray subpixel)
@@ -126,7 +126,6 @@ sub get_textbox_layout {
     my $font = $comp->font;
 
     my $fontmap = Pango::Cairo::FontMap->get_default;
-    $fontmap->set_resolution(72);
 
     my $desc = Pango::FontDescription->new;
     $desc->set_family($font->family);
@@ -154,6 +153,14 @@ sub get_textbox_layout {
     }
 
     my $pcontext = $layout->get_context;
+
+    $fontmap->set_resolution(72);
+    my $options = Cairo::FontOptions->create;
+    $options->set_antialias($font->antialias_mode);
+    $options->set_subpixel_order($font->subpixel_order);
+    $options->set_hint_style($font->hint_style);
+    $options->set_hint_metrics($font->hint_metrics);
+    Pango::Cairo::Context::set_font_options($pcontext, $options);
 
     if(defined($comp->direction)) {
         $pcontext->set_base_dir($comp->direction);
