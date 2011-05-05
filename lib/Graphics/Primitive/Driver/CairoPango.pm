@@ -16,7 +16,7 @@ extends 'Graphics::Primitive::Driver::Cairo';
 # with 'Graphics::Primitive::Driver';
 
 our $AUTHORITY = 'cpan:GPHAT';
-our $VERSION = '0.60';
+our $VERSION = '0.61';
 
 enum 'Graphics::Primitive::Driver::CairoPango::AntialiasModes' => (
     qw(default none gray subpixel)
@@ -101,7 +101,7 @@ sub _draw_textbox {
             if($comp->vertical_alignment eq 'bottom') {
                 $y = $bbox->height - $log->{height} / 2;
             } elsif($comp->vertical_alignment eq 'center') {
-                $y = $bbox->height / 2;
+                $y = $bbox->height / 2 - $log->{height} / 2;
             }
             $context->move_to($x, $y);
         }
@@ -116,6 +116,7 @@ sub get_textbox_layout {
     my $tl = Graphics::Primitive::Driver::CairoPango::TextLayout->new(
         component => $comp,
     );
+    
     unless(defined($comp->text)) {
         $tl->height(0);
         return $tl;
@@ -171,7 +172,7 @@ sub get_textbox_layout {
     $layout->set_width(Pango::units_from_double($width));
 
     if($comp->height) {
-        $layout->set_height(Pango::units_from_double($comp->height));
+        # $layout->set_height(Pango::units_from_double($comp->height));
     }
 
     if($comp->angle) {
