@@ -1,5 +1,8 @@
 Revision history for Graphics-Primitive-Driver-CairoPango
 
+0.62    May 5th, 2011
+  - Fix alignment issues related to padding in textboxes.
+
 0.61    May 5th, 2011
   - Fix alignment error when vertical_alignment is set to center.
 
