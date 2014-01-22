@@ -18,13 +18,13 @@ extends 'Graphics::Primitive::Driver::Cairo';
 our $AUTHORITY = 'cpan:GPHAT';
 our $VERSION = '0.61';
 
-enum 'Graphics::Primitive::Driver::CairoPango::AntialiasModes' => (
+enum 'Graphics::Primitive::Driver::CairoPango::AntialiasModes' => [
     qw(default none gray subpixel)
-);
+];
 
-enum 'Graphics::Primitive::Driver::CairoPango::Format' => (
+enum 'Graphics::Primitive::Driver::CairoPango::Format' => [
     qw(PDF PS PNG SVG pdf ps png svg)
-);
+];
 
 sub _draw_textbox {
     my ($self, $comp) = @_;
